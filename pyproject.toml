@@ -1,0 +1,23 @@
+[project]
+name = "kafka-order-pipeline"
+version = "0.1.0"
+description = "Fault-tolerant Kafka order processing stream with Avro serialization, running aggregation, retry logic, and DLQ"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "confluent-kafka>=2.4.0",
+    "fastavro>=1.9.4",
+    "pydantic>=2.7.0",
+    "rich>=13.7.0",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
