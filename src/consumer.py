@@ -183,7 +183,7 @@ class StreamOrderConsumer:
                         partition=partition,
                         offset=offset,
                         error_type="RetryExhaustionError",
-                        errorMessage=f"Exhausted {MAX_RETRIES} retry attempts: {err}",
+                        error_message=f"Exhausted {MAX_RETRIES} retry attempts: {err}",
                         retry_attempts=attempt,
                     )
                     return False
@@ -196,7 +196,7 @@ class StreamOrderConsumer:
                     partition=partition,
                     offset=offset,
                     error_type="BusinessValidationError",
-                    errorMessage=str(err),
+                    error_message=str(err),
                     retry_attempts=attempt,
                 )
                 return False
@@ -228,7 +228,7 @@ class StreamOrderConsumer:
         console.print(table)
         console.print()
 
-    def run(self):
+    def run(self, max_messages: int = 0, timeout_seconds: float = 0):
         """Main event loop for consuming and processing stream records."""
         self.consumer.subscribe([self.input_topic])
         console.rule("[bold green]Kafka Fault-Tolerant Order Consumer Started[/bold green]")
@@ -237,11 +237,29 @@ class StreamOrderConsumer:
         console.print(f"Consumer Group: [cyan]{CONSUMER_GROUP_ID}[/cyan]")
         console.print("Awaiting order events... Press Ctrl+C to stop.\n")
 
+        processed_total = 0
+        start_time = time.time()
+        idle_polls = 0
+
         try:
             while True:
+                if max_messages > 0 and processed_total >= max_messages:
+                    console.print(f"[bold green]Reached target of {max_messages} messages. Exiting cleanly.[/bold green]")
+                    break
+
+                if timeout_seconds > 0 and (time.time() - start_time) > timeout_seconds:
+                    console.print(f"[bold yellow]Timeout reached ({timeout_seconds}s). Exiting.[/bold yellow]")
+                    break
+
                 msg = self.consumer.poll(timeout=1.0)
                 if msg is None:
+                    idle_polls += 1
+                    # If max_messages was set and we have been idle for 5 consecutive polls AFTER processing something, break
+                    if max_messages > 0 and processed_total > 0 and idle_polls >= 5:
+                        break
                     continue
+
+                idle_polls = 0
                 if msg.error():
                     if msg.error().code() == KafkaError._PARTITION_EOF:
                         continue
@@ -252,6 +270,7 @@ class StreamOrderConsumer:
                 raw_key = msg.key()
                 partition = msg.partition()
                 offset = msg.offset()
+                processed_total += 1
 
                 # Step 1: Avro Deserialization
                 try:
@@ -264,7 +283,7 @@ class StreamOrderConsumer:
                         partition=partition,
                         offset=offset,
                         error_type="AvroDeserializationError",
-                        errorMessage=str(err),
+                        error_message=str(err),
                         retry_attempts=0,
                     )
                     self.consumer.commit(msg, asynchronous=False)
@@ -296,8 +315,14 @@ class StreamOrderConsumer:
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Kafka Order Stream Consumer")
+    parser.add_argument("--max-messages", type=int, default=0, help="Maximum messages to consume before exiting (0 = infinite)")
+    parser.add_argument("--timeout", type=float, default=0, help="Timeout in seconds before exiting (0 = infinite)")
+    args = parser.parse_args()
+
     consumer = StreamOrderConsumer()
-    consumer.run()
+    consumer.run(max_messages=args.max_messages, timeout_seconds=args.timeout)
 
 
 if __name__ == "__main__":
