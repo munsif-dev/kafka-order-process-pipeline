@@ -51,3 +51,4 @@ fi
 echo "Starting Kafka broker in KRaft mode on localhost:9092..."
 echo "Press Ctrl+C to stop."
 exec bin/kafka-server-start.sh "$KRAFT_CONFIG"
+
