@@ -67,3 +67,4 @@ def inspect_dlq(bootstrap_servers: str = KAFKA_BOOTSTRAP_SERVERS, dlq_topic: str
 
 if __name__ == "__main__":
     inspect_dlq()
+

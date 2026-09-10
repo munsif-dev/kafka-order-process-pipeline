@@ -20,3 +20,4 @@ RETRY_JITTER_MAX_SECONDS = float(os.getenv("RETRY_JITTER_MAX_SECONDS", "0.5"))
 
 # Producer Pacing
 PRODUCER_DEFAULT_INTERVAL = float(os.getenv("PRODUCER_DEFAULT_INTERVAL", "1.0"))
+

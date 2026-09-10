@@ -53,3 +53,4 @@ class AvroHelper:
             return record
         except Exception as exc:
             raise AvroDeserializationError(f"Failed to deserialize binary payload ({len(binary_data)} bytes): {exc}") from exc
+

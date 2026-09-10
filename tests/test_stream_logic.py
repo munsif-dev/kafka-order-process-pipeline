@@ -65,3 +65,4 @@ def test_transient_glitch_simulation():
 
     # Attempt 2 should succeed (self-heal)
     consumer._execute_business_logic(transient_order, attempt=2)
+

@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![uv](https://img.shields.io/badge/Package%20Manager-uv-blueviolet.svg)](https://docs.astral.sh/uv/)
-[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-3.7%20(KRaft)-black.svg)](https://kafka.apache.org/)
+[![Apache Kafka](<https://img.shields.io/badge/Apache%20Kafka-3.7%20(KRaft)-black.svg>)](https://kafka.apache.org/)
 [![Apache Avro](https://img.shields.io/badge/Serialization-Apache%20Avro-red.svg)](https://avro.apache.org/)
 [![Kafka UI](https://img.shields.io/badge/Dashboard-Kafka%20UI-green.svg)](https://github.com/provectus/kafka-ui)
 
@@ -55,13 +55,13 @@ Developed for **EC8203 Applied Big Data Engineering**, Department of Electrical 
 
 ## 2. Key Features & Compliance Matrix
 
-| Requirement | Implementation Details | Status |
-| :--- | :--- | :---: |
-| **Avro Serialization** | Strict schema (`schema/order.avsc`) with `orderId` (string), `product` (string), and `price` (float). 74% smaller payloads than JSON. | **COMPLETED** |
-| **Real-Time Aggregation** | In-memory state tracking total order count and cumulative price sum. Computes running average continuously in $O(1)$ time. | **COMPLETED** |
-| **Retry Logic** | Exponential backoff retry loop with randomized jitter ($T = 1.0\text{s} \times 2^{\text{attempt}-1} + \epsilon$) for transient external timeouts. | **COMPLETED** |
-| **Dead Letter Queue** | Routes unrecoverable poison pills (negative prices, corrupt non-Avro bytes, exhausted retries) to `orders-dlq` with enriched error envelopes. | **COMPLETED** |
-| **Live Demonstration** | Step-by-step CLI simulation flags (`--mode [normal|transient|poison-pill|malformed-avro]`) and real-time Kafka UI dashboard. | **COMPLETED** |
+| Requirement               | Implementation Details                                                                                                                            |    Status     |
+| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------ | :-----------: | ----------- | --------------------------------------------------- | ------------- |
+| **Avro Serialization**    | Strict schema (`schema/order.avsc`) with `orderId` (string), `product` (string), and `price` (float). 74% smaller payloads than JSON.             | **COMPLETED** |
+| **Real-Time Aggregation** | In-memory state tracking total order count and cumulative price sum. Computes running average continuously in $O(1)$ time.                        | **COMPLETED** |
+| **Retry Logic**           | Exponential backoff retry loop with randomized jitter ($T = 1.0\text{s} \times 2^{\text{attempt}-1} + \epsilon$) for transient external timeouts. | **COMPLETED** |
+| **Dead Letter Queue**     | Routes unrecoverable poison pills (negative prices, corrupt non-Avro bytes, exhausted retries) to `orders-dlq` with enriched error envelopes.     | **COMPLETED** |
+| **Live Demonstration**    | Step-by-step CLI simulation flags (`--mode [normal                                                                                                |   transient   | poison-pill | malformed-avro]`) and real-time Kafka UI dashboard. | **COMPLETED** |
 
 ---
 
@@ -77,7 +77,9 @@ Developed for **EC8203 Applied Big Data Engineering**, Department of Electrical 
 ## 4. Getting Started & Installation
 
 ### Step 1: Clone Repository & Install Dependencies
+
 This project uses `uv` for ultra-fast, reproducible dependency management:
+
 ```bash
 # Clone the repository
 git clone https://github.com/munsif/kafka-order-pipeline.git
@@ -88,12 +90,15 @@ uv sync
 ```
 
 ### Step 2: Start Kafka & Kafka UI
+
 Launch the containerized Kafka broker and web interface:
+
 ```bash
 make up
 # or
 docker compose up -d
 ```
+
 - **Kafka Broker**: `localhost:9092`
 - **Kafka UI**: [http://localhost:8080](http://localhost:8080)
 
@@ -102,17 +107,21 @@ docker compose up -d
 ## 5. Running the Pipeline & Live Demonstration
 
 ### Terminal 1: Start the Stream Consumer
+
 ```bash
 make consumer
 # or: uv run python -m src.consumer
 ```
+
 The consumer subscribes to `orders`, calculates the real-time running average, and displays live telemetry.
 
 ### Terminal 2: Start the Order Producer (Normal Stream)
+
 ```bash
 make producer
 # or: uv run python -m src.producer --mode normal
 ```
+
 Generates continuous random valid orders serialized in Avro binary format.
 
 ---
@@ -120,44 +129,59 @@ Generates continuous random valid orders serialized in Avro binary format.
 ## 6. Fault Tolerance & Failure Injection Scenarios
 
 ### Scenario A: Transient Anomaly & Auto-Recovery
+
 Simulate an intermittent network/database timeout:
+
 ```bash
 make test-transient
 # or: uv run python -m src.producer --mode transient --count 1
 ```
+
 **Observed Behavior**:
+
 1. The consumer catches the transient error.
 2. It pauses and retries with exponential backoff (`Attempt 1: wait 1.0s`, `Attempt 2: wait 2.0s`).
 3. It self-heals, completes processing, and incorporates the order into the running average.
 
 ### Scenario B: Poison Pill (Business Logic Violation)
+
 Inject an order with an invalid negative price:
+
 ```bash
 make test-poison
 # or: uv run python -m src.producer --mode poison-pill --count 1
 ```
+
 **Observed Behavior**:
+
 1. Price validation fails ($P \le 0$).
 2. The consumer packages the event into an enriched DLQ diagnostic envelope and forwards it to `orders-dlq`.
 3. The consumer commits its offset on `orders` and continues uninterrupted.
 
 ### Scenario C: Corrupted Non-Avro Payload
+
 Inject malformed binary data into the stream:
+
 ```bash
 make test-corrupt
 # or: uv run python -m src.producer --mode malformed-avro --count 1
 ```
+
 **Observed Behavior**:
+
 1. Avro deserialization detects an invalid binary header.
 2. The corrupt payload is immediately trapped and quarantined to `orders-dlq`.
 3. The main consumer pipeline remains completely unaffected.
 
 ### Terminal 3: Monitoring the Dead Letter Queue
+
 Inspect quarantined failure envelopes in real time:
+
 ```bash
 make dlq
 # or: uv run python -m src.dlq_inspector
 ```
+
 Or view the `orders-dlq` topic directly in the web browser at **[http://localhost:8080](http://localhost:8080)**.
 
 ---
