@@ -211,7 +211,8 @@ kafka-order-pipeline/
 
 ## 8. Live Demonstration Video & Links
 
-- **Live YouTube Video Demonstration**: [Watch on YouTube](https://youtube.com/watch?v=YOUR_VIDEO_ID_HERE)
+- **Live YouTube Video Demonstration**: [Watch on YouTube](https://youtu.be/6tjfLNEq-sI)
+- **Google Drive Video Mirror**: [Watch on Google Drive](https://drive.google.com/file/d/1Ym4bfmcMKtSNs9RxAmezuISVMOYpTI70/view?usp=sharing)
 - **Source Code Repository**: [GitHub Repository](https://github.com/munsif-dev/kafka-order-process-pipeline)
 
 ---
