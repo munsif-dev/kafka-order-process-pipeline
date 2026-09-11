@@ -54,8 +54,12 @@ def inspect_dlq(
                 else:
                     raise KafkaException(msg.error())
 
+            raw_bytes = msg.value()
+            if raw_bytes is None:
+                continue
+
             count += 1
-            raw_val = msg.value().decode("utf-8", errors="replace")
+            raw_val = raw_bytes.decode("utf-8", errors="replace")
 
             try:
                 envelope = json.loads(raw_val)

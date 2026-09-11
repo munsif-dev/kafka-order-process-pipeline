@@ -89,10 +89,13 @@ class StreamOrderConsumer:
         failed_timestamp = datetime.now(timezone.utc).isoformat()
 
         # Try to decode or base64 encode raw value for diagnostic visibility
-        try:
-            safe_payload_preview = raw_value.decode('utf-8')
-        except UnicodeDecodeError:
-            safe_payload_preview = base64.b64encode(raw_value).decode('ascii')
+        if raw_value is None:
+            safe_payload_preview = "<null>"
+        else:
+            try:
+                safe_payload_preview = raw_value.decode("utf-8")
+            except (UnicodeDecodeError, AttributeError):
+                safe_payload_preview = base64.b64encode(raw_value).decode("ascii")
 
         dlq_envelope = {
             "originalTopic": self.input_topic,
@@ -267,6 +270,10 @@ class StreamOrderConsumer:
                         raise KafkaException(msg.error())
 
                 raw_val = msg.value()
+                if raw_val is None:
+                    self.consumer.commit(msg, asynchronous=False)
+                    continue
+
                 raw_key = msg.key()
                 partition = msg.partition()
                 offset = msg.offset()
