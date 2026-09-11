@@ -82,8 +82,8 @@ This project uses `uv` for ultra-fast, reproducible dependency management:
 
 ```bash
 # Clone the repository
-git clone https://github.com/munsif/kafka-order-pipeline.git
-cd kafka-order-pipeline
+git clone https://github.com/munsif-dev/kafka-order-process-pipeline.git
+cd kafka-order-process-pipeline
 
 # Sync virtual environment and dependencies via uv
 uv sync
@@ -212,7 +212,7 @@ kafka-order-pipeline/
 ## 8. Live Demonstration Video & Links
 
 - **Live YouTube Video Demonstration**: [Watch on YouTube](https://youtube.com/watch?v=YOUR_VIDEO_ID_HERE)
-- **Source Code Repository**: [GitHub Repository](https://github.com/munsif/kafka-order-pipeline)
+- **Source Code Repository**: [GitHub Repository](https://github.com/munsif-dev/kafka-order-process-pipeline)
 
 ---
 
